@@ -1,0 +1,47 @@
+#CI3import numpy as np
+
+# Objective Function
+def f(x):
+    return x**2
+
+# Clonal Selection Algorithm
+def clonal_selection(pop_size, clones, mutation, generations):
+
+    # Generate random population
+    population = np.random.uniform(-10, 10, pop_size)
+
+    for g in range(generations):
+
+        # Calculate fitness
+        fitness = np.array([f(x) for x in population])
+
+        # Select best solutions
+        best = population[np.argsort(fitness)[:clones]]
+
+        # Clone and mutate
+        new_pop = np.repeat(best, clones)
+        new_pop = new_pop + np.random.normal(0, mutation, len(new_pop))
+
+        # Update population
+        population = np.clip(new_pop, -10, 10)
+
+        # Best result
+        best_solution = population[np.argmin([f(x) for x in population])]
+        best_fitness = f(best_solution)
+
+        print(f"Generation {g+1}: Best Fitness = {best_fitness} , Best Solution ={best_solution}")
+
+    return best_solution, best_fitness
+
+
+# Main Program
+best_solution, best_fitness = clonal_selection(
+    pop_size=20,
+    clones=5,
+    mutation=0.1,
+    generations=50
+)
+
+print("\nFinal Result")
+print("Best Solution:", best_solution)
+print("Best Fitness:", best_fitness)
