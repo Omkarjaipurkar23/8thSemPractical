@@ -1,0 +1,161 @@
+# Hybrid Genetic Algorithm + Neural Network
+# Using IRIS Dataset
+
+import random
+from sklearn.datasets import load_iris
+from sklearn.neural_network import MLPClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# -----------------------------------------
+# LOAD IRIS DATASET
+# -----------------------------------------
+
+iris = load_iris()
+
+X = iris.data
+y = iris.target
+
+# Split dataset into training and testing
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y,
+    test_size=0.3,
+    random_state=1
+)
+
+# -----------------------------------------
+# GENETIC ALGORITHM PARAMETERS
+# -----------------------------------------
+
+population_size = 5
+generations = 5
+mutation_rate = 0.2
+
+# -----------------------------------------
+# CREATE INITIAL POPULATION
+# Each chromosome = hidden neuron count
+# -----------------------------------------
+
+population = []
+
+for i in range(population_size):
+
+    neurons = random.randint(2, 10)
+
+    population.append(neurons)
+
+# -----------------------------------------
+# FITNESS FUNCTION
+# Higher accuracy = better fitness
+# -----------------------------------------
+
+def fitness(neurons):
+
+    # Create Neural Network
+
+    model = MLPClassifier(
+        hidden_layer_sizes=(neurons,),
+        max_iter=1000,
+        random_state=1
+    )
+
+    # Train model
+
+    model.fit(X_train, y_train)
+
+    # Predict output
+
+    prediction = model.predict(X_test)
+
+    # Calculate accuracy
+
+    accuracy = accuracy_score(y_test, prediction)
+
+    return accuracy
+
+# -----------------------------------------
+# GENETIC ALGORITHM MAIN LOOP
+# -----------------------------------------
+
+for generation in range(generations):
+
+    print("\nGeneration", generation + 1)
+
+    scores = []
+
+    # Evaluate all chromosomes
+
+    for chromosome in population:
+
+        accuracy = fitness(chromosome)
+
+        scores.append((chromosome, accuracy))
+
+        print("Neurons =", chromosome,
+              " Accuracy =", round(accuracy, 4))
+
+    # Sort based on highest accuracy
+
+    scores.sort(key=lambda x: x[1], reverse=True)
+
+    # Select best two parents
+
+    best1 = scores[0][0]
+    best2 = scores[1][0]
+
+    print("Best Neurons =", best1)
+
+    # -----------------------------------------
+    # CREATE NEW POPULATION
+    # -----------------------------------------
+
+    new_population = [best1, best2]
+
+    while len(new_population) < population_size:
+
+        # CROSSOVER
+
+        child = (best1 + best2) // 2
+
+        # MUTATION
+
+        if random.random() < mutation_rate:
+
+            child += random.randint(-1, 1)
+
+        # Avoid invalid neuron count
+
+        child = max(2, child)
+
+        new_population.append(child)
+
+    population = new_population
+
+# -----------------------------------------
+# FINAL BEST MODEL
+# -----------------------------------------
+
+best_neurons = population[0]
+
+print("\n--------------------------------")
+print("OPTIMIZED RESULT")
+print("--------------------------------")
+
+print("Optimal Hidden Neurons =", best_neurons)
+
+# Train final model
+
+final_model = MLPClassifier(
+    hidden_layer_sizes=(best_neurons,),
+    max_iter=1000,
+    random_state=1
+)
+
+final_model.fit(X_train, y_train)
+
+final_prediction = final_model.predict(X_test)
+
+final_accuracy = accuracy_score(y_test, final_prediction)
+
+print("\nFinal Accuracy =", round(final_accuracy, 4))
