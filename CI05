@@ -1,0 +1,51 @@
+#CI5# Ant Colony Optimization for Traveling Salesman Problem
+
+import numpy as np
+import random
+
+# Distance Matrix
+dist = np.array([
+    [0, 2, 2, 5],
+    [2, 0, 4, 8],
+    [2, 4, 0, 1],
+    [5, 8, 1, 0]
+])
+
+n = len(dist)
+
+# Function to calculate total distance
+def route_length(route):
+    total = 0
+    for i in range(n - 1):
+        total += dist[route[i]][route[i + 1]]
+    total += dist[route[-1]][route[0]]
+    return total
+
+
+# ACO Algorithm
+def aco(iterations=50, ants=5):
+    best_route = None
+    best_distance = float('inf')
+    for i in range(iterations):
+        for j in range(ants):
+            # Generate random route
+            route = random.sample(range(n), n)
+            # Calculate distance
+            distance = route_length(route)
+            # Update best route
+            if distance < best_distance:
+                best_distance = distance
+                best_route = route
+
+        print(f"Iteration {i+1}")
+        print("Best Route =", best_route)
+        print("Shortest Distance =", best_distance)
+        print()
+
+    return best_route, best_distance
+
+# Main Program
+route, distance = aco()
+
+print("Final Best Route:", route)
+print("Final Shortest Distance:", distance)
