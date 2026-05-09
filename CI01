@@ -1,0 +1,80 @@
+# Fuzzy Sets
+A = {'a': 0.2, 'b': 0.5, 'c': 0.7, 'd': 0.9}
+B = {'a': 0.3, 'b': 0.6, 'c': 0.4, 'd': 0.8}
+
+print("Fuzzy Set A:", A)
+print("Fuzzy Set B:", B)
+
+# UNION
+union = {}
+for key in A:
+    union[key] = max(A[key], B[key])
+
+print("\nUnion:", union)
+
+# INTERSECTION
+intersection = {}
+for key in A:
+    intersection[key] = min(A[key], B[key])
+
+print("\nIntersection:", intersection)
+
+# COMPLEMENT OF A
+complement = {}
+for key in A:
+    complement[key] = 1 - A[key]
+
+print("\nComplement of A:", complement)
+
+# DIFFERENCE A-B
+difference = {}
+for key in A:
+    difference[key] = min(A[key], 1 - B[key])
+
+print("\nDifference A-B:", difference)
+
+# FUZZY RELATION (Cartesian Product)
+A1 = [0.2, 0.6]
+B1 = [0.5, 0.8]
+
+relation = []
+
+for i in A1:
+    row = []
+
+    for j in B1:
+        row.append(min(i, j))
+
+    relation.append(row)
+
+print("\nFuzzy Relation:")
+for row in relation:
+    print(row)
+
+# MAX-MIN COMPOSITION
+
+R1 = [
+    [0.2, 0.6],
+    [0.5, 0.9]
+]
+
+R2 = [
+    [0.3, 0.8],
+    [0.6, 0.4]
+]
+
+result = [[0, 0], [0, 0]]
+
+for i in range(2):
+    for j in range(2):
+
+        values = []
+
+        for k in range(2):
+            values.append(min(R1[i][k], R2[k][j]))
+
+        result[i][j] = max(values)
+
+print("\nMax-Min Composition:")
+for row in result:
+    print(row)
