@@ -1,0 +1,40 @@
+# MapReduce Program for Word Frequency
+
+text = '''
+I like Hadoop.
+Hadoop is good for big data.
+MapReduce is part of Hadoop. 
+'''
+
+# Mapper
+def mapper(text):
+    result = []
+    for word in text.split():
+        word = word.lower().strip('.,!?')
+        result.append((word, 1))
+    return result
+
+
+# Shuffle and Sort
+def shuffle_sort(data):
+    result = {}
+    for word, count in data:
+        if word not in result:
+            result[word] = []
+        result[word].append(count)
+    return result
+
+# Reducer
+def reducer(data):
+    result = {}
+    for word, counts in data.items():
+        result[word] = sum(counts)
+    return result
+
+# Main Program
+map_output = mapper(text)
+shuffle_output = shuffle_sort(map_output)
+
+final_output = reducer(shuffle_output)
+
+print(final_output)
