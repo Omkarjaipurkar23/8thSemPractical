@@ -1,0 +1,93 @@
+#DC5# Import pandas library
+import pandas as pd
+
+# Read CSV file
+df = pd.read_csv('mumbai_weather.csv')
+
+# Display first 5 rows
+df.head()
+
+# Fill missing average temperature values
+df['tavg'] = df['tavg'].fillna((df['tmin'] + df['tmax'])/2)
+
+# Check null values
+df.isnull().sum()
+
+# Extract year from date column
+df['Year'] = df['time'].apply(lambda x: x.split('-')[2])
+
+# Display last 5 rows
+df.tail()
+
+# Fill missing tavg values using yearly mean
+df['tavg'] = df.groupby('Year')['tavg'].transform(lambda x: x.fillna(x.mean()))
+
+# Fill missing minimum temperature values
+df['tmin'] = df['tmin'].fillna(df['tavg'] - 5)
+
+# Fill missing maximum temperature values
+df['tmax'] = df['tmax'].fillna(df['tavg'] + 5)
+
+# Fill missing precipitation values
+df['prcp'] = df['prcp'].fillna(0)
+
+# Check null values
+df.isnull().sum()
+
+# Display dataset shape
+df.shape()
+
+# Mapper function
+def mapper(df):
+    output = []
+
+    for i in range(len(df)):
+        output.append((df['Year'][i], df['tavg'][i]))
+
+    return output
+
+# Apply mapper function
+mapped_output = mapper(df)
+
+# Display mapped output
+mapped_output
+
+# Reducer function
+def reducer(mapped_output):
+
+    grouped = {}
+
+    # Group temperatures by year
+    for year, tavg in mapped_output:
+
+        if year in grouped:
+            grouped[year].append(tavg)
+
+        else:
+            grouped[year] = [tavg]
+
+    # Calculate average temperature year-wise
+    avg_by_year = {
+        year: sum(tavgs)/len(tavgs)
+        for year, tavgs in grouped.items()
+    }
+
+    return avg_by_year
+
+# Execute reducer function
+reducer_output = reducer(mapped_output)
+
+# Display reducer output
+reducer_output
+
+# Find hottest year
+hottest_year = max(reducer_output, key=reducer_output.get)
+
+print("🔥 Hottest Year:", hottest_year,
+      "Average Temp =", reducer_output[hottest_year])
+
+# Find coldest year
+coldest_year = min(reducer_output, key=reducer_output.get)
+
+print("❄️ Coldest Year:", coldest_year,
+      "Average Temp =", reducer_output[coldest_year])
