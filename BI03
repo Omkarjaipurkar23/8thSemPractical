@@ -1,0 +1,81 @@
+#Perform the Extraction Transformation and Loading (ETL) process to construct the database in the Sql server / Power BI.
+
+
+# Import libraries
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# -------------------------
+# 1. EXTRACT
+# -------------------------
+# Load dataset
+data = pd.read_csv('Telco-Customer-Churn3.csv')
+
+print("Original Data:")
+print(data.head())
+
+# -------------------------
+# 2. TRANSFORM
+# -------------------------
+
+# Remove customerID (not useful for analysis)
+data = data.drop(columns=['customerID'])
+
+# Convert TotalCharges to numeric (it may contain spaces)
+data['TotalCharges'] = pd.to_numeric(data['TotalCharges'], errors='coerce')
+
+# Remove missing values
+data = data.dropna()
+
+# Convert Churn to numeric (Yes=1, No=0)
+data['Churn'] = data['Churn'].map({'Yes': 1, 'No': 0})
+
+print("\nCleaned Data:")
+print(data.head())
+
+# -------------------------
+# 3. LOAD
+# -------------------------
+# Save cleaned data
+data.to_csv('cleaned_telco_data.csv', index=False)
+
+# -------------------------
+# 4. VISUALIZATION
+# -------------------------
+
+# --- 1. Churn Count ---
+churn_count = data['Churn'].value_counts()
+
+plt.figure()
+churn_count.plot(kind='bar')
+
+plt.title("Churn Distribution")
+plt.xlabel("Churn (0 = No, 1 = Yes)")
+plt.ylabel("Number of Customers")
+
+plt.show()
+
+# --- 2. Monthly Charges vs Churn ---
+plt.figure()
+
+for churn_value in data['Churn'].unique():
+    subset = data[data['Churn'] == churn_value]
+    plt.hist(subset['MonthlyCharges'], alpha=0.5, label=f'Churn {churn_value}')
+
+plt.title("Monthly Charges Distribution by Churn")
+plt.xlabel("Monthly Charges")
+plt.ylabel("Count")
+plt.legend()
+
+plt.show()
+
+# --- 3. Contract Type vs Churn ---
+contract_churn = pd.crosstab(data['Contract'], data['Churn'])
+
+contract_churn.plot(kind='bar')
+
+plt.title("Contract Type vs Churn")
+plt.xlabel("Contract Type")
+plt.ylabel("Number of Customers")
+
+plt.show()
