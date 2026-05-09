@@ -1,0 +1,36 @@
+ #BI2import pandas as pd
+import sqlite3
+
+# Extract data from CSV
+data = pd.read_csv("uber.csv")
+
+print("Extracted Data")
+print(data.head())
+
+# Transform the data
+data = data.drop_duplicates()
+data = data.fillna(method='ffill')
+
+print("Transformed Data")
+print(data.head())
+
+# Load data into database
+conn = sqlite3.connect("BI_database.db")
+
+data.to_sql(
+    "uber_table",
+    conn,
+    if_exists="replace",
+    index=False
+)
+
+print("Data Loaded Successfully")
+
+# Read data from database
+result = pd.read_sql("SELECT * FROM uber_table", conn)
+
+print("Database Data")
+print(result.head())
+
+# ETL process completed
+print("ETL Process Completed")
